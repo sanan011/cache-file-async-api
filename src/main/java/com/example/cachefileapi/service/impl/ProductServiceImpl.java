@@ -7,6 +7,7 @@ import com.example.cachefileapi.entity.Product;
 import com.example.cachefileapi.exception.DuplicateResourceException;
 import com.example.cachefileapi.exception.ResourceNotFoundException;
 import com.example.cachefileapi.repository.ProductRepository;
+import com.example.cachefileapi.service.NotificationService;
 import com.example.cachefileapi.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import java.util.List;
  *   <li>{@code getAllProducts} — cached in {@link CacheConstants#PRODUCTS_LIST}.
  *       Evicted on any write operation.</li>
  *   <li>{@code getProductById} — cached per-id in {@link CacheConstants#PRODUCTS}.</li>
- *   <li>{@code createProduct} — evicts the list cache after creation.</li>
+ *   <li>{@code createProduct} — evicts the list cache after creation and fires an async notification.</li>
  *   <li>{@code updateProduct} — updates the per-id cache entry and evicts the list cache.</li>
  *   <li>{@code deleteProduct} — evicts both the per-id entry and the list cache.</li>
  * </ul>
@@ -36,6 +37,7 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final NotificationService notificationService;
 
     // -----------------------------------------------------------------------
     // Read operations
@@ -75,6 +77,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = toEntity(request);
         Product saved = productRepository.save(product);
         log.info("Created product id={}, name='{}'", saved.getId(), saved.getName());
+        notificationService.sendProductCreatedNotification(saved.getName());
         return toResponse(saved);
     }
 

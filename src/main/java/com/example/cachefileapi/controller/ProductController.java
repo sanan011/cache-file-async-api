@@ -8,6 +8,11 @@ import com.example.cachefileapi.exception.ResourceNotFoundException;
 import com.example.cachefileapi.repository.ProductRepository;
 import com.example.cachefileapi.service.FileStorageService;
 import com.example.cachefileapi.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +27,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * REST controller exposing CRUD endpoints for {@link com.example.cachefileapi.entity.Product}.
@@ -37,6 +41,7 @@ import java.util.Objects;
 @RequestMapping("/products")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Products", description = "Product CRUD and image upload/download")
 public class ProductController {
 
     private final ProductService     productService;
@@ -54,6 +59,7 @@ public class ProductController {
      * @return 200 OK with the list of all products
      */
     @GetMapping
+    @Operation(summary = "List all products", description = "Returns every product in the catalog.")
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
@@ -65,7 +71,9 @@ public class ProductController {
      * @return 200 OK with the product, or 404 if not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
+    @Operation(summary = "Get product by ID", description = "Returns a single product by its primary key.")
+    public ResponseEntity<ProductResponse> getProductById(
+            @Parameter(description = "Product ID") @PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
@@ -76,6 +84,7 @@ public class ProductController {
      * @return 201 Created with a {@code Location} header and the created product body
      */
     @PostMapping
+    @Operation(summary = "Create a product", description = "Creates a new product and triggers an async notification.")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
         ProductResponse created = productService.createProduct(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -93,8 +102,9 @@ public class ProductController {
      * @return 200 OK with the updated product, or 404 if not found
      */
     @PutMapping("/{id}")
+    @Operation(summary = "Update a product", description = "Replaces an existing product's fields.")
     public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long id,
+            @Parameter(description = "Product ID") @PathVariable Long id,
             @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(productService.updateProduct(id, request));
     }
@@ -106,7 +116,9 @@ public class ProductController {
      * @return 204 No Content, or 404 if not found
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    @Operation(summary = "Delete a product", description = "Permanently removes a product by ID.")
+    public ResponseEntity<Void> deleteProduct(
+            @Parameter(description = "Product ID") @PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
@@ -128,9 +140,18 @@ public class ProductController {
      * @return 200 OK with {@code {"imageFileName": "<generated-name>"}}
      */
     @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Upload or replace product image",
+            description = "Accepts multipart/form-data with a single 'file' field. "
+                    + "Validated for size (≤5 MB), extension, content type, and magic bytes.")
     public ResponseEntity<Map<String, String>> uploadImage(
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file) {
+            @Parameter(description = "Product ID") @PathVariable Long id,
+            @Parameter(
+                    description = "Image file to upload (max 5 MB; allowed: jpg, jpeg, png, gif, webp)",
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("file") MultipartFile file) {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
@@ -158,7 +179,11 @@ public class ProductController {
      * @return 200 OK with image bytes, or 404 if no image is set
      */
     @GetMapping("/{id}/image")
-    public ResponseEntity<Resource> downloadImage(@PathVariable Long id) {
+    @Operation(
+            summary = "Download product image",
+            description = "Returns the raw image bytes for the product. Responds with 404 if no image is set.")
+    public ResponseEntity<Resource> downloadImage(
+            @Parameter(description = "Product ID") @PathVariable Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 

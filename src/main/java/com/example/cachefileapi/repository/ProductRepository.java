@@ -57,4 +57,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      */
     @Query("SELECT p.id AS id, p.name AS name FROM Product p ORDER BY p.name ASC")
     List<Object[]> findAllIdAndName();
+
+    /**
+     * Returns all non-blank image filenames currently referenced by products.
+     */
+    @Query("SELECT p.imageFileName FROM Product p "
+            + "WHERE p.imageFileName IS NOT NULL AND p.imageFileName <> ''")
+    List<String> findAllImageFileNames();
 }

@@ -61,3 +61,5 @@ logging:
 app:
   upload:
     dir: ${UPLOAD_DIR:./uploads}
+  cleanup:
+    cron: ${CLEANUP_CRON:0 0 2 * * *}

@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/cachedb}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+
+  jpa:
+    show-sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+logging:
+  level:
+    root: DEBUG
+    com.example: DEBUG
+    org.springframework.cache: TRACE
+
+app:
+  cleanup:
+    cron: ${CLEANUP_CRON:0 */5 * * * *}   # every 5 minutes — easy to test locally

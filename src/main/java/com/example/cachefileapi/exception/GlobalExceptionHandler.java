@@ -41,6 +41,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFile(
+            InvalidFileException ex, WebRequest request) {
+        log.warn("Invalid file upload: {}", ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
     // -----------------------------------------------------------------------
     // Validation exceptions
     // -----------------------------------------------------------------------

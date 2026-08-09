@@ -48,4 +48,8 @@ public class Product implements Serializable {
     @Min(value = 0, message = "Stock quantity must be zero or greater")
     @Column(nullable = false)
     private Integer stockQuantity;
+
+    /** Nullable — set after a successful image upload via {@code POST /products/{id}/image}. */
+    @Column(nullable = true)
+    private String imageFileName;
 }

@@ -12,12 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * Testing/ops utility endpoints — not intended for production use without proper auth.
- *
- * <p>Base path: {@code /api/admin} (context path {@code /api} is set in
- * {@code application.yml}, this controller maps {@code /admin}).</p>
- */
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -27,19 +21,9 @@ public class AdminController {
 
     private final FileCleanupService fileCleanupService;
 
-    /**
-     * {@code POST /admin/cleanup} — manually trigger orphaned file cleanup on demand.
-     *
-     * <p>Testing/ops utility: invokes the same logic as the scheduled cleanup job
-     * without waiting for the cron trigger.</p>
-     *
-     * @return 200 OK with {@code {"removedCount": N}}
-     */
     @PostMapping("/cleanup")
-    @Operation(
-            summary = "Trigger orphaned file cleanup",
-            description = "Manually runs the same cleanup job as the scheduled task. "
-                    + "Deletes upload-directory files not referenced by any product's imageFileName.")
+    @Operation(summary = "Trigger orphaned file cleanup", description = "Manually runs the same cleanup job as the scheduled task. "
+            + "Deletes upload-directory files not referenced by any product's imageFileName.")
     public ResponseEntity<Map<String, Integer>> triggerCleanup() {
         log.info("Manual cleanup triggered via POST /admin/cleanup");
         int removed = fileCleanupService.cleanupOrphanedFiles();

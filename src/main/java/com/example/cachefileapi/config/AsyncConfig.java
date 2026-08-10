@@ -7,12 +7,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
-/**
- * Async execution configuration.
- *
- * <p>Provides a {@link ThreadPoolTaskExecutor} so {@code @Async} methods do not
- * run on Spring's default single-thread executor.</p>
- */
 @Configuration
 @EnableAsync
 public class AsyncConfig {

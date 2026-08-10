@@ -17,19 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Default implementation of {@link ProductService}.
- *
- * <h3>Caching strategy</h3>
- * <ul>
- *   <li>{@code getAllProducts} — cached in {@link CacheConstants#PRODUCTS_LIST}.
- *       Evicted on any write operation.</li>
- *   <li>{@code getProductById} — cached per-id in {@link CacheConstants#PRODUCTS}.</li>
- *   <li>{@code createProduct} — evicts the list cache after creation and fires an async notification.</li>
- *   <li>{@code updateProduct} — updates the per-id cache entry and evicts the list cache.</li>
- *   <li>{@code deleteProduct} — evicts both the per-id entry and the list cache.</li>
- * </ul>
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -83,10 +70,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @Caching(
-        put    = @CachePut(value  = CacheConstants.PRODUCTS, key = "#id"),
-        evict  = @CacheEvict(value = CacheConstants.PRODUCTS_LIST, allEntries = true)
-    )
+    @Caching(put = @CachePut(value = CacheConstants.PRODUCTS, key = "#id"), evict = @CacheEvict(value = CacheConstants.PRODUCTS_LIST, allEntries = true))
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
@@ -104,8 +88,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Caching(evict = {
-        @CacheEvict(value = CacheConstants.PRODUCTS,      key = "#id"),
-        @CacheEvict(value = CacheConstants.PRODUCTS_LIST, allEntries = true)
+            @CacheEvict(value = CacheConstants.PRODUCTS, key = "#id"),
+            @CacheEvict(value = CacheConstants.PRODUCTS_LIST, allEntries = true)
     })
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {

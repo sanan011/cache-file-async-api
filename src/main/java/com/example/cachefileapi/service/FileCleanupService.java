@@ -16,7 +16,8 @@ import java.util.stream.Stream;
 
 /**
  * Removes orphaned image files from the upload directory — files that exist on
- * disk but are not referenced by any {@link com.example.cachefileapi.entity.Product#imageFileName}.
+ * disk but are not referenced by any
+ * {@link com.example.cachefileapi.entity.Product#imageFileName}.
  */
 @Service
 @Slf4j
@@ -40,11 +41,6 @@ public class FileCleanupService {
         cleanupOrphanedFiles();
     }
 
-    /**
-     * Scans the upload directory and deletes files not referenced in the database.
-     *
-     * @return the number of orphaned files removed
-     */
     public int cleanupOrphanedFiles() {
         log.info("Starting orphaned file cleanup");
 

@@ -5,12 +5,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-/**
- * Request DTO used when creating or updating a {@link com.example.cachefileapi.entity.Product}.
- *
- * <p>Validation annotations here mirror those on the entity so the API layer
- * rejects bad data before it ever reaches the service or database.</p>
- */
 @Getter
 @Setter
 @NoArgsConstructor

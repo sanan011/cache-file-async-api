@@ -11,14 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.time.Instant;
 import java.util.*;
 
-/**
- * Centralised exception handler that translates domain/validation exceptions
- * into structured JSON error responses.
- *
- * <p>Extends {@link ResponseEntityExceptionHandler} to inherit Spring MVC's
- * built-in handling for standard exceptions (e.g. method not allowed, media
- * type not supported) while adding application-specific overrides.</p>
- */
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {

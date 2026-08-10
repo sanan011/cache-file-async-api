@@ -7,12 +7,6 @@ import lombok.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-/**
- * Product entity — the base domain object used throughout caching demonstrations.
- *
- * <p>Implements {@link Serializable} so instances can be stored in Redis as-is
- * (or serialized via Jackson when using a JSON-based RedisSerializer).</p>
- */
 @Entity
 @Table(name = "products")
 @Getter
@@ -49,7 +43,10 @@ public class Product implements Serializable {
     @Column(nullable = false)
     private Integer stockQuantity;
 
-    /** Nullable — set after a successful image upload via {@code POST /products/{id}/image}. */
+    /**
+     * Nullable — set after a successful image upload via
+     * {@code POST /products/{id}/image}.
+     */
     @Column(nullable = true)
     private String imageFileName;
 }

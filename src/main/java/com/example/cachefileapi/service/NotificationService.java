@@ -11,11 +11,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class NotificationService {
 
-    /**
-     * Simulates sending a "product created" email notification asynchronously.
-     *
-     * @param productName the name of the newly created product
-     */
     @Async
     public void sendProductCreatedNotification(String productName) {
         log.info("[{}] Sending product-created notification for '{}'",

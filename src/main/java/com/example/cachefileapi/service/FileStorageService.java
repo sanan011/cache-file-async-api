@@ -23,26 +23,33 @@ import java.util.UUID;
  *
  * <h3>Validation performed by {@link #storeFile}</h3>
  * <ol>
- *   <li>File must not be empty.</li>
- *   <li>File size must not exceed {@value #MAX_FILE_SIZE_BYTES} bytes (5 MB).</li>
- *   <li>Extension must be one of {@link #ALLOWED_EXTENSIONS}.</li>
- *   <li>Declared content type must start with {@code image/} (first-pass filter only).</li>
- *   <li>File content must match a known image signature (PNG, JPEG, GIF, or WEBP magic bytes).</li>
+ * <li>File must not be empty.</li>
+ * <li>File size must not exceed {@value #MAX_FILE_SIZE_BYTES} bytes (5
+ * MB).</li>
+ * <li>Extension must be one of {@link #ALLOWED_EXTENSIONS}.</li>
+ * <li>Declared content type must start with {@code image/} (first-pass filter
+ * only).</li>
+ * <li>File content must match a known image signature (PNG, JPEG, GIF, or WEBP
+ * magic bytes).</li>
  * </ol>
  *
- * <p>Stored files are named {@code <UUID>.<extension>} — the raw original filename
- * is never used as a path component, preventing path-traversal attacks.</p>
+ * <p>
+ * Stored files are named {@code <UUID>.<extension>} — the raw original filename
+ * is never used as a path component, preventing path-traversal attacks.
+ * </p>
  */
 @Service
 @Slf4j
 public class FileStorageService {
 
-    /** 5 MB in bytes — defence-in-depth; Spring's multipart resolver enforces this first. */
+    /**
+     * 5 MB in bytes — defence-in-depth; Spring's multipart resolver enforces this
+     * first.
+     */
     private static final long MAX_FILE_SIZE_BYTES = 5L * 1024 * 1024;
 
     /** Allowed image extensions (lower-cased). */
-    private static final Set<String> ALLOWED_EXTENSIONS =
-            Set.of("jpg", "jpeg", "png", "gif", "webp");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp");
 
     /** Bytes to read for magic-byte detection (WEBP needs 12). */
     private static final int MAGIC_HEADER_SIZE = 12;
@@ -71,21 +78,14 @@ public class FileStorageService {
     // Public API
     // -----------------------------------------------------------------------
 
-    /**
-     * Validates and stores a product image file.
-     *
-     * @param file      the uploaded multipart file
-     * @param productId the owning product id (used only for logging)
-     * @return the generated safe filename (UUID + extension) to persist on the entity
-     * @throws InvalidFileException if any validation check fails
-     */
     public String storeFile(MultipartFile file, Long productId) {
         // 1. Must not be empty
         if (file == null || file.isEmpty()) {
             throw new InvalidFileException("Uploaded file must not be empty.");
         }
 
-        // 2. Size guard (defence-in-depth — multipart resolver already rejects above 5 MB)
+        // 2. Size guard (defence-in-depth — multipart resolver already rejects above 5
+        // MB)
         if (file.getSize() > MAX_FILE_SIZE_BYTES) {
             throw new InvalidFileException(
                     "File size " + file.getSize() + " bytes exceeds the maximum allowed size of 5 MB.");
@@ -97,7 +97,7 @@ public class FileStorageService {
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             throw new InvalidFileException(
                     "Unsupported file extension '" + extension + "'. "
-                    + "Allowed extensions: " + ALLOWED_EXTENSIONS + ".");
+                            + "Allowed extensions: " + ALLOWED_EXTENSIONS + ".");
         }
 
         // 4. Content-type check — first-pass filter only; magic bytes are authoritative
@@ -105,7 +105,7 @@ public class FileStorageService {
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new InvalidFileException(
                     "File content type '" + contentType + "' is not an image. "
-                    + "Only image/* content types are accepted.");
+                            + "Only image/* content types are accepted.");
         }
 
         // 5. Build a safe, unique filename and store
@@ -130,13 +130,6 @@ public class FileStorageService {
         return safeFileName;
     }
 
-    /**
-     * Loads a stored file as a Spring {@link Resource}.
-     *
-     * @param fileName the safe filename returned by {@link #storeFile}
-     * @return a readable {@link Resource}
-     * @throws ResourceNotFoundException if the file does not exist or is not readable
-     */
     public Resource loadFileAsResource(String fileName) {
         try {
             Path filePath = uploadDir.resolve(fileName).normalize();
@@ -156,9 +149,6 @@ public class FileStorageService {
     // Helpers
     // -----------------------------------------------------------------------
 
-    /**
-     * Reads up to {@code size} bytes from the stream for magic-byte inspection.
-     */
     private byte[] readHeader(InputStream inputStream, int size) throws IOException {
         byte[] header = new byte[size];
         int totalRead = 0;
@@ -177,9 +167,6 @@ public class FileStorageService {
         return header;
     }
 
-    /**
-     * Validates that the file header matches a known image format signature.
-     */
     private void validateImageMagicBytes(byte[] header) {
         if (isJpeg(header) || isPng(header) || isGif(header) || isWebp(header)) {
             return;
@@ -216,10 +203,6 @@ public class FileStorageService {
                 && header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50;
     }
 
-    /**
-     * Extracts the lower-cased file extension from a filename.
-     * Returns an empty string if the filename has no extension.
-     */
     private String extractExtension(String filename) {
         if (filename == null || filename.isBlank()) {
             return "";
